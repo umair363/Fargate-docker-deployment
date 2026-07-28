@@ -12,8 +12,8 @@ export default defineConfig({
       interval: 1000
     },
     proxy: {
-      '/insert': 'http://backend:8000',
-      '/records': 'http://backend:8000'
+      '/insert': 'http://backend.local:8000',
+      '/records': 'http://backend.local:8000'
     }
   }
 })

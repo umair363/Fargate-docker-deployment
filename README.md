@@ -85,5 +85,13 @@ We are currently in the process of migrating this exact architecture from our lo
 **Cloud Architecture Roadmap:**
 1. **AWS ECR (Elastic Container Registry):** Pushing our local Docker images to the cloud. ✅
 2. **AWS RDS (Relational Database Service):** Replacing our local DB container with a managed PostgreSQL server for production safety. ✅
-3. **AWS Security Groups:** Creating networking rules to allow backend-to-database communication. (In Progress)
-4. **AWS ECS Fargate:** Running our frontend and backend Docker containers in serverless cloud environments.
+3. **AWS Security Groups:** Creating networking rules to allow backend-to-database communication. ✅
+4. **AWS ECS Fargate:** Running our frontend and backend Docker containers in serverless cloud environments. ✅
+
+---
+
+## ☁️ The Ultimate AWS Deployment Guide
+
+Curious about every single button we clicked in AWS and *why* we clicked it? We documented the entire cloud migration process, explaining the underlying concepts of IAM, ECR, RDS, Security Groups, Fargate, and Cloud Map Service Discovery.
+
+👉 **[Read the AWS Fargate Deployment Guide Here (AWS_FARGATE_DEPLOYMENT_GUIDE.md)](./AWS_FARGATE_DEPLOYMENT_GUIDE.md)**
