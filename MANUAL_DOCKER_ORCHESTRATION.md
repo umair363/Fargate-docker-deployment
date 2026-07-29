@@ -56,6 +56,7 @@ Next, we had to start the FastAPI backend and connect it to the database.
 ```bash
 docker run -d \
   --name backend \
+  --network-alias backend.local \
   --network manual-devops-net \
   -e DATABASE_URL=postgresql://user:password@db:5432/appdb \
   -p 8000:8000 \
@@ -63,7 +64,8 @@ docker run -d \
 ```
 
 **What every flag means:**
-* `--name backend`: Names the container `backend`. This is critical because the frontend is going to look for this exact name.
+* `--name backend`: Names the container `backend`.
+* `--network-alias backend.local`: This is critical. Because we updated our React app to look for `backend.local` (for AWS Cloud Map compatibility), we must explicitly tell the local Docker network to alias this container to `backend.local` so the frontend proxy can find it.
 * `--network manual-devops-net`: Plugs it into the same network as the database.
 * `-e DATABASE_URL=...`: Notice the URL says `@db:5432`. Because we named the database container `db`, the Docker network automatically resolves the word `db` to the database's internal IP address!
 * `-p 8000:8000`: Mapped your laptop's port 8000 to the container's port 8000 so you can view the API documentation at `localhost:8000/docs`.
