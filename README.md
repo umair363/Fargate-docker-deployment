@@ -1,95 +1,112 @@
-# SettleMint: Containerized 3-Tier Web Application 🚀
+# SettleMint: Containerized 3-Tier Architecture 🚀
 
-Welcome to the SettleMint DevOps project! This repository demonstrates a modern, fully containerized 3-tier web application using Docker, complete with manual local container orchestration and a pathway to cloud deployment on AWS ECS Fargate.
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 
-## 🏗️ Architecture Overview
+A production-ready, fully containerized 3-tier web application designed to demonstrate robust DevOps principles, manual container orchestration, and seamless transition from local development to a serverless AWS infrastructure.
 
-Our application is built on a robust 3-tier architecture. In local development, all three tiers run in isolated Docker containers connected via a private Docker bridge network.
+---
+
+## 🏗️ System Architecture
+
+The application implements a strict separation of concerns across presentation, business logic, and data persistence tiers.
 
 ```mermaid
 graph TD
-    User([User / Browser])
+    Client([Client / Web Browser])
     
-    subgraph "Docker Bridge Network"
-        Frontend["⚛️ React + Vite<br/>(Frontend Container)<br/>Exposed Port: 5173"]
-        Backend["🐍 FastAPI<br/>(Backend Container)<br/>Internal Port: 8000"]
-        DB[("🐘 PostgreSQL<br/>(Database Container)<br/>Internal Port: 5432")]
+    subgraph "Application Network (VPC / Docker Bridge)"
+        Frontend["UI Tier<br/>(React + Vite)<br/>Port: 5173"]
+        Backend["API Tier<br/>(FastAPI / Uvicorn)<br/>Port: 8000"]
+        DB[("Data Tier<br/>(PostgreSQL)<br/>Port: 5432")]
     end
     
-    %% Connections
-    User -- "HTTP (localhost:5173)" --> Frontend
-    Frontend -- "Vite Proxy (/insert, /records)" --> Backend
-    Backend -- "SQL (tcp://db:5432)" --> DB
+    %% Traffic Flow
+    Client -- "HTTP" --> Frontend
+    Frontend -- "Internal Reverse Proxy" --> Backend
+    Backend -- "TCP / SQL" --> DB
     
     %% Styling
-    classDef frontend fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:white;
-    classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:white;
-    classDef database fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:white;
+    classDef frontend fill:#1e1e1e,stroke:#61DAFB,stroke-width:2px,color:white;
+    classDef backend fill:#1e1e1e,stroke:#009688,stroke-width:2px,color:white;
+    classDef database fill:#1e1e1e,stroke:#336791,stroke-width:2px,color:white;
     
     class Frontend frontend;
     class Backend backend;
     class DB database;
 ```
 
-### 1. Frontend (Presentation Tier)
-* **Tech Stack:** React, Vite, Vanilla CSS (Premium Glassmorphism UI)
-* **Role:** Serves the interactive user interface to the client's browser.
-* **Network Magic:** Uses Vite's built-in reverse proxy to securely forward API requests to the backend container without triggering browser CORS restrictions.
-
-### 2. Backend (Business Logic Tier)
-* **Tech Stack:** Python, FastAPI, Uvicorn
-* **Role:** Handles data validation, business rules, and communicates with the database.
-
-### 3. Database (Data Tier)
-* **Tech Stack:** PostgreSQL (Alpine Linux)
-* **Role:** Provides persistent storage using Docker Volumes so data isn't lost when the container stops.
+### Technical Stack
+* **Frontend:** React 18, Vite, Custom CSS (Glassmorphism design system)
+* **Backend:** Python 3.12, FastAPI, Uvicorn, SQLAlchemy
+* **Database:** PostgreSQL 16 (Alpine)
+* **Infrastructure:** Docker, AWS ECS (Fargate), AWS RDS, AWS ECR, AWS Cloud Map
 
 ---
 
-## 🚀 How to Run Locally
+## 💻 Local Development Environment
 
-To truly understand how containers communicate, this project intentionally avoids `docker-compose`. We manually create the networks and run the containers using raw Docker commands.
+To enforce a deeper understanding of container networking and lifecycle management, this repository explicitly avoids `docker-compose`. All environments are orchestrated using raw Docker CLI commands via custom bridge networks.
 
-You do not need to install Python, Node, or PostgreSQL on your laptop. You only need **Docker Desktop**.
+### Prerequisites
+* Docker Engine / Docker Desktop
+* Git
 
-👉 **[Read the Manual Docker Orchestration Guide Here (MANUAL_DOCKER_ORCHESTRATION.md)](./MANUAL_DOCKER_ORCHESTRATION.md)**
+### Manual Orchestration
+To deploy the application locally, execute the following container lifecycle commands:
 
-Inside that guide, you will find the exact 4 `docker run` commands required to boot up this 3-tier application locally.
+**1. Initialize the Network Boundary**
+```bash
+docker network create manual-devops-net
+```
 
-### 🔄 Live Reloading
-This project is configured with advanced Docker Volume bind mounts. Any changes you make to the React CSS/JS or the Python code on your Windows host will **automatically hot-reload** inside the running Linux containers!
+**2. Provision the Data Tier**
+```bash
+docker run -d --name db --network manual-devops-net \
+  -e POSTGRES_USER=user \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=appdb \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5433:5432 postgres:16-alpine
+```
+
+**3. Deploy the API Tier**
+```bash
+docker run -d --name backend \
+  --network-alias backend.local \
+  --network manual-devops-net \
+  -e DATABASE_URL=postgresql://user:password@db:5432/appdb \
+  -p 8000:8000 docker-lab-backend
+```
+
+**4. Deploy the UI Tier (with Hot-Reloading)**
+```bash
+docker run -d --name frontend --network manual-devops-net \
+  -v ${PWD}/frontend:/app \
+  -p 5173:5173 docker-lab-frontend
+```
 
 ---
 
-## 📚 The Ultimate Docker Guide
+## ☁️ AWS Cloud Infrastructure
 
-As part of this project, we wrote a massive, 1,400+ line comprehensive guide to mastering Docker. If you want to understand *why* this works under the hood, read the guide!
+The application is architected for a serverless cloud deployment using the AWS ecosystem, completely mirroring the local manual orchestration structure.
 
-👉 **[Read the Full Docker Guide Here (DOCKER_GUIDE.md)](./DOCKER_GUIDE.md)**
-
-**What's inside the guide:**
-- Virtualization vs Containerization
-- Deep dives into Images, Containers, Volumes, and Networks
-- Line-by-line breakdowns of our custom `Dockerfile`s
-- How to fix native Linux-binding errors on Windows volume mounts
-- Full CLI command cheat sheet
+* **Compute:** AWS ECS running on AWS Fargate (Serverless container execution).
+* **Registry:** Images are securely hosted in Amazon ECR.
+* **Database:** Fully managed Amazon RDS PostgreSQL instance to ensure data durability and automated backups.
+* **Service Discovery:** AWS Cloud Map provides internal DNS resolution (`backend.local`), allowing the frontend proxy to route API requests securely within the VPC without exposing the backend to the public internet.
+* **Security:** Granular Security Groups restrict access between tiers (e.g., the RDS instance only accepts traffic from the Backend Security Group).
 
 ---
 
-## ☁️ AWS Cloud Deployment (In Progress)
+## 📚 Technical Documentation
 
-We are currently in the process of migrating this exact architecture from our local Docker Engine to AWS. 
+For deep-dive architectural decisions, internal container mechanics, and step-by-step AWS provisioning details, refer to the internal engineering guides:
 
-**Cloud Architecture Roadmap:**
-1. **AWS ECR (Elastic Container Registry):** Pushing our local Docker images to the cloud. ✅
-2. **AWS RDS (Relational Database Service):** Replacing our local DB container with a managed PostgreSQL server for production safety. ✅
-3. **AWS Security Groups:** Creating networking rules to allow backend-to-database communication. ✅
-4. **AWS ECS Fargate:** Running our frontend and backend Docker containers in serverless cloud environments. ✅
-
----
-
-## ☁️ The Ultimate AWS Deployment Guide
-
-Curious about every single button we clicked in AWS and *why* we clicked it? We documented the entire cloud migration process, explaining the underlying concepts of IAM, ECR, RDS, Security Groups, Fargate, and Cloud Map Service Discovery.
-
-👉 **[Read the AWS Fargate Deployment Guide Here (AWS_FARGATE_DEPLOYMENT_GUIDE.md)](./AWS_FARGATE_DEPLOYMENT_GUIDE.md)**
+* [The Manual Docker Orchestration Guide](./MANUAL_DOCKER_ORCHESTRATION.md)
+* [AWS ECS Fargate Deployment Architecture](./AWS_FARGATE_DEPLOYMENT_GUIDE.md)
+* [Comprehensive Docker Engine Guide](./DOCKER_GUIDE.md)
