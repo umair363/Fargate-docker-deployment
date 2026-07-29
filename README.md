@@ -1,6 +1,6 @@
 # SettleMint: Containerized 3-Tier Web Application 🚀
 
-Welcome to the SettleMint DevOps project! This repository demonstrates a modern, fully containerized 3-tier web application using Docker, complete with local orchestration via Docker Compose and a pathway to cloud deployment on AWS ECS Fargate.
+Welcome to the SettleMint DevOps project! This repository demonstrates a modern, fully containerized 3-tier web application using Docker, complete with manual local container orchestration and a pathway to cloud deployment on AWS ECS Fargate.
 
 ## 🏗️ Architecture Overview
 
@@ -48,15 +48,13 @@ graph TD
 
 ## 🚀 How to Run Locally
 
+To truly understand how containers communicate, this project intentionally avoids `docker-compose`. We manually create the networks and run the containers using raw Docker commands.
+
 You do not need to install Python, Node, or PostgreSQL on your laptop. You only need **Docker Desktop**.
 
-1. Clone this repository.
-2. Open your terminal in the root directory.
-3. Run the orchestration command:
-   ```bash
-   docker-compose up -d
-   ```
-4. Open your browser and navigate to `http://localhost:5173`.
+👉 **[Read the Manual Docker Orchestration Guide Here (MANUAL_DOCKER_ORCHESTRATION.md)](./MANUAL_DOCKER_ORCHESTRATION.md)**
+
+Inside that guide, you will find the exact 4 `docker run` commands required to boot up this 3-tier application locally.
 
 ### 🔄 Live Reloading
 This project is configured with advanced Docker Volume bind mounts. Any changes you make to the React CSS/JS or the Python code on your Windows host will **automatically hot-reload** inside the running Linux containers!
