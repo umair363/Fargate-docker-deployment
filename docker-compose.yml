@@ -17,6 +17,10 @@ services:
   backend:
     build: ./backend
     container_name: fastapi_backend
+    networks:
+      default:
+        aliases:
+          - backend.local
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/appdb
     ports:
